@@ -1,3 +1,4 @@
+# Firma Digital con RSA y ECC - Versión corregida final Juve
 import streamlit as st
 import base64
 import csv
@@ -62,7 +63,8 @@ def path_llaves(usuario, tipo):
     return f"llaves_{tipo}_{usuario}.csv"
 
 def generar_llaves_y_guardar_csv(usuario, tipo):
-    if tipo == "RSA":
+    tipo = tipo.lower()
+    if tipo == "rsa":
         private_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
     else:
         private_key = ec.generate_private_key(ec.SECP256R1())
@@ -88,6 +90,7 @@ def generar_llaves_y_guardar_csv(usuario, tipo):
     return private_key, public_key
 
 def cargar_llaves_desde_csv(usuario, tipo):
+    tipo = tipo.lower()
     data = s3_download(path_llaves(usuario, tipo))
     f = StringIO(data.decode())
     reader = csv.DictReader(f)
@@ -99,11 +102,12 @@ def cargar_llaves_desde_csv(usuario, tipo):
     return private_key, public_key
 
 def firmar_archivo(file_bytes, private_key, tipo):
+    tipo = tipo.lower()
     digest = hashes.Hash(hashes.SHA256())
     digest.update(file_bytes)
     hashed_data = digest.finalize()
 
-    if tipo == "RSA":
+    if tipo == "rsa":
         return private_key.sign(
             hashed_data,
             padding.PSS(mgf=padding.MGF1(hashes.SHA256()), salt_length=padding.PSS.MAX_LENGTH),
@@ -116,6 +120,7 @@ def firmar_archivo(file_bytes, private_key, tipo):
         )
 
 def verificar_firma(file_bytes, signature, public_key, tipo):
+    tipo = tipo.lower()
     digest = hashes.Hash(hashes.SHA256())
     digest.update(file_bytes)
     hashed_data = digest.finalize()
@@ -134,15 +139,13 @@ def verificar_firma(file_bytes, signature, public_key, tipo):
     except:
         return False
 
-
-
+# === INTERFAZ STREAMLIT ===
 col1, col2 = st.columns([4, 2])
 with col1:
     st.title(" ")
-    st.title("🔐 Firma Digital con RSA")
+    st.title("🔐 Firma Digital con RSA y ECC")
 with col2:
     st.image("prepanet.png", width=250)
-
 
 menu = st.sidebar.selectbox("Menú", ["Registrarse", "Iniciar sesión"])
 
@@ -169,7 +172,7 @@ elif menu == "Iniciar sesión":
 
     if 'usuario' in st.session_state:
         usuario = st.session_state['usuario']
-        tipo_llave = st.radio("Tipo de firma", ["RSA", "Curvas Elípticas"], horizontal=True)
+        tipo_llave = st.radio("Tipo de firma", ["rsa", "ecc"], horizontal=True)
         path_csv = path_llaves(usuario, tipo_llave)
 
         if not s3_download(path_csv):
@@ -195,7 +198,7 @@ elif menu == "Iniciar sesión":
 
             usuarios = [u['usuario'] for u in cargar_usuarios()]
             firmante = st.selectbox("Selecciona el usuario que firmó el archivo", usuarios)
-            tipo_verif = st.radio("Tipo de llave del firmante", ["RSA", "Curvas Elípticas"], horizontal=True)
+            tipo_verif = st.radio("Tipo de llave del firmante", ["rsa", "ecc"], horizontal=True)
 
             if firmante:
                 path_firmante = path_llaves(firmante, tipo_verif)
@@ -204,11 +207,10 @@ elif menu == "Iniciar sesión":
                     if file_original and file_signature and st.button("Verificar firma"):
                         original_bytes = file_original.read()
                         signature_bytes = file_signature.read()
-                    
-                        # 👇 Aquí pones los prints de depuración
+
                         st.write("Tamaño archivo:", len(original_bytes))
                         st.write("Tamaño firma:", len(signature_bytes))
-                    
+
                         result = verificar_firma(original_bytes, signature_bytes, public_key_firmante, tipo_verif)
                         if result:
                             st.success("✅ Firma válida. El archivo es auténtico.")
