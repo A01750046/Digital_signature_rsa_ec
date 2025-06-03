@@ -218,8 +218,6 @@ elif menu == "Iniciar sesión":
                         original_bytes = file_original.read()
                         signature_bytes = file_signature.read()
 
-                        st.write("Tamaño archivo:", len(original_bytes))
-                        st.write("Tamaño firma:", len(signature_bytes))
 
                         result = verificar_firma(original_bytes, signature_bytes, public_key_firmante, tipo_verif)
                         if result:
