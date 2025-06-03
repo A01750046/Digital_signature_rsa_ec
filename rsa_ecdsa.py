@@ -1,4 +1,4 @@
-# Firma Digital con RSA y ECC - Versión corregida final Juve
+# Firma Digital con RSA y ECC - Versión corregida y visual elegante Juve
 import streamlit as st
 import base64
 import csv
@@ -143,11 +143,19 @@ def verificar_firma(file_bytes, signature, public_key, tipo):
 col1, col2 = st.columns([4, 2])
 with col1:
     st.title(" ")
-    st.title("🔐 Firma Digital con RSA y ECC")
+    st.title("🔐 Firma Digital con RSA y Curvas Elípticas")
 with col2:
     st.image("prepanet.png", width=250)
 
 menu = st.sidebar.selectbox("Menú", ["Registrarse", "Iniciar sesión"])
+
+tipo_display = {"RSA": "rsa", "Curvas Elípticas": "ecc"}
+
+def get_tipo_llave_display(tipo_interno):
+    for nombre, val in tipo_display.items():
+        if val == tipo_interno:
+            return nombre
+    return tipo_interno
 
 if menu == "Registrarse":
     st.header("Crear nuevo usuario")
@@ -172,7 +180,8 @@ elif menu == "Iniciar sesión":
 
     if 'usuario' in st.session_state:
         usuario = st.session_state['usuario']
-        tipo_llave = st.radio("Tipo de firma", ["rsa", "ecc"], horizontal=True)
+        tipo_nombre = st.radio("Tipo de firma", list(tipo_display.keys()), horizontal=True)
+        tipo_llave = tipo_display[tipo_nombre]
         path_csv = path_llaves(usuario, tipo_llave)
 
         if not s3_download(path_csv):
@@ -188,7 +197,7 @@ elif menu == "Iniciar sesión":
             if file_to_sign and st.button("Firmar"):
                 file_bytes = file_to_sign.read()
                 signature = firmar_archivo(file_bytes, private_key, tipo_llave)
-                st.success("✅ Archivo firmado correctamente.")
+                st.success(f"✅ Archivo firmado correctamente con {tipo_nombre}.")
                 st.download_button("Descargar firma", data=signature, file_name=file_to_sign.name + ".signature")
 
         with tab2:
@@ -198,7 +207,8 @@ elif menu == "Iniciar sesión":
 
             usuarios = [u['usuario'] for u in cargar_usuarios()]
             firmante = st.selectbox("Selecciona el usuario que firmó el archivo", usuarios)
-            tipo_verif = st.radio("Tipo de llave del firmante", ["rsa", "ecc"], horizontal=True)
+            tipo_nombre_verif = st.radio("Tipo de llave del firmante", list(tipo_display.keys()), horizontal=True)
+            tipo_verif = tipo_display[tipo_nombre_verif]
 
             if firmante:
                 path_firmante = path_llaves(firmante, tipo_verif)
@@ -213,7 +223,7 @@ elif menu == "Iniciar sesión":
 
                         result = verificar_firma(original_bytes, signature_bytes, public_key_firmante, tipo_verif)
                         if result:
-                            st.success("✅ Firma válida. El archivo es auténtico.")
+                            st.success(f"✅ Firma válida con {tipo_nombre_verif}. El archivo es auténtico.")
                         else:
                             st.error("❌ Firma inválida o archivo modificado.")
                 else:
