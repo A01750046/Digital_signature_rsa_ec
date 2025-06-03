@@ -169,7 +169,7 @@ elif menu == "Iniciar sesión":
 
     if 'usuario' in st.session_state:
         usuario = st.session_state['usuario']
-        tipo_llave = st.radio("Tipo de firma", ["rsa", "ecc"], horizontal=True)
+        tipo_llave = st.radio("Tipo de firma", ["RSA", "Curvas Elípticas"], horizontal=True)
         path_csv = path_llaves(usuario, tipo_llave)
 
         if not s3_download(path_csv):
