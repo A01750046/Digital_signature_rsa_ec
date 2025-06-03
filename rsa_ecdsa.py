@@ -1,4 +1,3 @@
-# Firma Digital con RSA y ECC - Versión corregida y visual elegante Juve
 import streamlit as st
 import base64
 import csv
@@ -139,7 +138,6 @@ def verificar_firma(file_bytes, signature, public_key, tipo):
     except:
         return False
 
-# === INTERFAZ STREAMLIT ===
 col1, col2 = st.columns([4, 2])
 with col1:
     st.title(" ")
