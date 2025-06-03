@@ -143,7 +143,7 @@ def verificar_firma(file_bytes, signature, public_key, tipo):
 col1, col2 = st.columns([4, 2])
 with col1:
     st.title(" ")
-    st.title("🔐 Firma Digital con RSA y Curvas Elípticas")
+    st.title("🔐 Firma Digital con RSA y Curvas Elípticas :)")
 with col2:
     st.image("prepanet.png", width=250)
 
