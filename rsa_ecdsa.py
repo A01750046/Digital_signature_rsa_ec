@@ -202,7 +202,10 @@ elif menu == "Iniciar sesión":
                 if s3_download(path_firmante):
                     _, public_key_firmante = cargar_llaves_desde_csv(firmante, tipo_verif)
                     if file_original and file_signature and st.button("Verificar firma"):
-                        result = verificar_firma(file_original.read(), file_signature.read(), public_key_firmante, tipo_verif)
+                        original_bytes = file_original.read()
+                        signature_bytes = file_signature.read()
+                    
+                        result = verificar_firma(original_bytes, signature_bytes, public_key_firmante, tipo_verif)
                         if result:
                             st.success("✅ Firma válida. El archivo es auténtico.")
                         else:
