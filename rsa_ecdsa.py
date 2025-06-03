@@ -62,7 +62,7 @@ def path_llaves(usuario, tipo):
     return f"llaves_{tipo}_{usuario}.csv"
 
 def generar_llaves_y_guardar_csv(usuario, tipo):
-    if tipo == "rsa":
+    if tipo == "RSA":
         private_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
     else:
         private_key = ec.generate_private_key(ec.SECP256R1())
@@ -103,7 +103,7 @@ def firmar_archivo(file_bytes, private_key, tipo):
     digest.update(file_bytes)
     hashed_data = digest.finalize()
 
-    if tipo == "rsa":
+    if tipo == "RSA":
         return private_key.sign(
             hashed_data,
             padding.PSS(mgf=padding.MGF1(hashes.SHA256()), salt_length=padding.PSS.MAX_LENGTH),
@@ -195,7 +195,7 @@ elif menu == "Iniciar sesión":
 
             usuarios = [u['usuario'] for u in cargar_usuarios()]
             firmante = st.selectbox("Selecciona el usuario que firmó el archivo", usuarios)
-            tipo_verif = st.radio("Tipo de llave del firmante", ["rsa", "ecc"], horizontal=True)
+            tipo_verif = st.radio("Tipo de llave del firmante", ["RSA", "Curvas Elípticas"], horizontal=True)
 
             if firmante:
                 path_firmante = path_llaves(firmante, tipo_verif)
